@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>YaoYueMusic_Admin</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        padding: 20px;
+        max-width: 1200px;
+        margin: auto;
+        background-color: #f0f2f5;
+      }
+      .container {
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+      h1,
+      h2 {
+        color: #333;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 10px;
+        margin-top: 30px;
+        margin-bottom: 20px;
+      }
+      h1:first-child {
+        margin-top: 0;
+      }
+      button {
+        background-color: #007bff;
+        color: #fff;
+        padding: 6px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        margin-right: 5px;
+        font-size: 14px;
+      }
+      .btn-success {
+        background-color: #28a745;
+      }
+      .btn-danger {
+        background-color: #dc3545;
+      }
+      .btn-secondary {
+        background-color: #6c757d;
+      }
+      button:hover {
+        opacity: 0.8;
+      }
+      button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+      }
+      #logs {
+        margin-top: 20px;
+        background-color: #222;
+        color: #fff;
+        padding: 15px;
+        border-radius: 4px;
+        font-family: "Courier New", Courier, monospace;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+      #management-view {
+        display: none;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      td,
+      th {
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        text-align: left;
+      }
+      th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+      }
+      #login-view fieldset {
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 5px;
+      }
+      #login-view legend {
+        font-weight: 700;
+        color: #555;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 5px;
+      }
+      input[type="password"],
+      input[type="text"],
+      select,
+      textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+      textarea {
+        min-height: 100px;
+        resize: vertical;
+      }
+      input:disabled {
+        background-color: #e9ecef;
+        cursor: not-allowed;
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+      .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 700px;
+        border-radius: 8px;
+      }
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 10px;
+      }
+      .modal-header h2 {
+        margin: 0;
+      }
+      .close-btn {
+        color: #aaa;
+        font-size: 28px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .file-section {
+        background-color: #fafafa;
+        padding: 15px;
+        border: 1px dashed #ddd;
+        border-radius: 5px;
+        margin-top: 20px;
+      }
+      .file-row {
+        display: grid;
+        grid-template-columns: 180px 1fr 100px;
+        align-items: center;
+        gap: 15px;
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+      }
+      .file-row:last-child {
+        border-bottom: none;
+      }
+      .status-text {
+        font-style: italic;
+        color: #666;
+      }
+      .progress-bar {
+        width: 100%;
+        background-color: #e0e0e0;
+        border-radius: 4px;
+        overflow: hidden;
+        height: 10px;
+        margin-top: 5px;
+        display: none;
+      }
+      .progress-bar-inner {
+        width: 0%;
+        height: 100%;
+        background-color: #007bff;
+        transition: width 0.2s;
+      }
+      .attributes-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #f0f8ff;
+        border-radius: 4px;
+      }
+      .attributes-container > div {
+        flex: 1 1 200px;
+      }
+      #song-filter-status {
+        font-weight: 400;
+        font-size: 1rem;
+        color: #555;
+        margin-left: 15px;
+      }
+    </style>
+    <script src="https://gosspublic.alicdn.com/aliyun-oss-sdk-6.18.0.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div id="login-view">
+        <h1>LOG IN TO OSS</h1>
+        <fieldset>
+          <legend>ACCOUNT</legend>
+          <div class="form-group">
+            <label for="oss-region">Region</label
+            ><input type="text" id="oss-region" value="oss-cn-hongkong" />
+          </div>
+          <div class="form-group">
+            <label for="oss-bucket">Bucket</label
+            ><input type="text" id="oss-bucket" value="yaoyuemusic" />
+          </div>
+          <div class="form-group">
+            <label for="oss-ak-id">Access Key ID</label
+            ><input
+              type="text"
+              id="oss-ak-id"
+              placeholder="请输入AccessKeyId"
+            />
+          </div>
+          <div class="form-group">
+            <label for="oss-ak-secret">Access Key Secret</label
+            ><input
+              type="password"
+              id="oss-ak-secret"
+              placeholder="请输入AccessKeySecret"
+            />
+          </div>
+        </fieldset>
+        <button id="connect-btn">LOG IN</button>
+      </div>
+      <div id="management-view">
+        <h1>摇月草窝后台</h1>
+        <button id="refresh-btn">[Refresh] 刷新列表</button>
+        <h2>专辑管理</h2>
+        <button id="add-album-btn" class="btn-success">[New] 新增专辑</button>
+        <table id="albums-table">
+          <thead>
+            <tr>
+              <th>专辑ID</th>
+              <th>标题</th>
+              <th>艺术家</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <h2>歌曲管理<span id="song-filter-status"></span></h2>
+        <button id="add-song-btn" class="btn-success">[New] 新增歌曲</button>
+        <button
+          id="show-all-songs-btn"
+          class="btn-secondary"
+          style="display: none"
+        >
+          显示全部歌曲
+        </button>
+        <table id="songs-table">
+          <thead>
+            <tr>
+              <th>歌曲ID</th>
+              <th>标题</th>
+              <th>艺术家</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <h2>操作日志</h2>
+        <div id="logs">等待操作...</div>
+      </div>
+    </div>
+    <div id="song-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="song-modal-title">歌曲窗口</h2>
+          <span class="close-btn song-modal-close">&times;</span>
+        </div>
+        <div class="form-group">
+          <label for="song-id">歌曲ID (创建后不可更改)</label
+          ><input type="text" id="song-id" />
+        </div>
+        <div class="form-group">
+          <label for="song-title">标题 (必填)</label
+          ><input type="text" id="song-title" />
+        </div>
+        <div class="form-group">
+          <label for="song-artist">艺术家</label
+          ><input type="text" id="song-artist" />
+        </div>
+        <div class="form-group">
+          <label for="song-album">专辑</label
+          ><input type="text" id="song-album" />
+        </div>
+        <div class="form-group">
+          <label for="song-bv">BV号 (可选)</label
+          ><input type="text" id="song-bv" placeholder="例如: BV1fA411b7qV" />
+        </div>
+        <div class="form-group">
+          <label for="song-buy">正版购买链接 (可选)</label
+          ><input
+            type="text"
+            id="song-buy"
+            placeholder="例如: https://music.apple.com/us/album/..."
+          />
+        </div>
+        <div id="file-section" class="file-section"><h3>文件管理</h3></div>
+        <button id="save-song-btn">保存</button>
+      </div>
+    </div>
+    <div id="album-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="album-modal-title">专辑窗口</h2>
+          <span class="close-btn album-modal-close">&times;</span>
+        </div>
+        <div class="form-group">
+          <label for="album-id">专辑ID (创建后不可更改)</label
+          ><input type="text" id="album-id" />
+        </div>
+        <div class="form-group">
+          <label for="album-title">标题 (必填)</label
+          ><input type="text" id="album-title" />
+        </div>
+        <div class="form-group">
+          <label for="album-artist">艺术家</label
+          ><input type="text" id="album-artist" />
+        </div>
+        <div class="form-group">
+          <label for="album-songs">包含的歌曲ID (每行一个)</label>
+          <textarea
+            id="album-songs"
+            placeholder="song_id_1&#10;song_id_2&#10;song_id_3"
+          ></textarea>
+        </div>
+        <div class="file-section">
+          <h3>专辑封面</h3>
+          <div class="file-row" id="album-cover-row">
+            <label>封面 (cover.jpg)</label>
+            <div>
+              <input
+                type="file"
+                id="album-cover-input"
+                accept=".jpg,.jpeg,.png"
+              />
+              <span class="status-text">❌ 不存在</span>
+              <div class="progress-bar" id="progress-bar-album-cover">
+                <div class="progress-bar-inner"></div>
+              </div>
+            </div>
+            <button
+              class="btn-secondary"
+              id="delete-album-cover-btn"
+              style="display: none"
+            >
+              删除
+            </button>
+          </div>
+        </div>
+        <button id="save-album-btn">保存</button>
+      </div>
+    </div>
+    <script>
+      let client = null;
+      const jsonPath = "data/music-list.json";
+      let allSongs = [];
+      let allAlbums = [];
+      let songModalMode = "add";
+      let albumModalMode = "add";
+      let editingSongIndex = -1;
+      let editingAlbumIndex = -1;
+
+      const FILE_DEFINITIONS = {
+        eac3joc: {
+          label: "杜比全景声 (DD.mp4)",
+          fileName: "DD.mp4",
+          prop: "availableFiles",
+          subProp: "eac3joc",
+        },
+        binaural: {
+          label: "双耳音频 (DDB.wav)",
+          fileName: "DDB.wav",
+          prop: "availableFiles",
+          subProp: "binaural",
+        },
+        original: {
+          label: "原音频 (ORI.flac)",
+          fileName: "ORI.flac",
+          prop: "availableFiles",
+          subProp: "original",
+          attributes: true,
+        },
+        cover: {
+          label: "封面 (cover.jpg)",
+          fileName: "cover.jpg",
+          prop: "hasArtwork",
+        },
+        lyrics: {
+          label: "歌词 (lyrics.lrc)",
+          fileName: "lyrics.lrc",
+          prop: "hasLyrics",
+        },
+      };
+      const ID_VALIDATION_REGEX = /^[a-zA-Z0-9_]+$/;
+
+      // DOM
+      const loginView = document.getElementById("login-view");
+      const managementView = document.getElementById("management-view");
+      const logsDiv = document.getElementById("logs");
+      const songsTableBody = document.querySelector("#songs-table tbody");
+      const albumsTableBody = document.querySelector("#albums-table tbody");
+      const songModal = document.getElementById("song-modal");
+      const albumModal = document.getElementById("album-modal");
+      const songFilterStatus = document.getElementById("song-filter-status");
+      const showAllSongsBtn = document.getElementById("show-all-songs-btn");
+
+      // LOG
+      function log(message, isError = false) {
+        const statusIcon = isError ? "[ERROR]" : "[INFO]";
+        let color = isError ? "color: #ff4d4d;" : "#fff";
+        if (!isError && message.includes("成功")) {
+          color = "color: #33ff33;";
+        }
+        logsDiv.innerHTML += `<span style="${color}">${statusIcon} ${new Date().toLocaleTimeString()}: ${message}</span>\n`;
+        logsDiv.scrollTop = logsDiv.scrollHeight;
+      }
+
+      // LOG IN
+      document.getElementById("connect-btn").addEventListener("click", () => {
+        const region = document.getElementById("oss-region").value.trim();
+        const bucket = document.getElementById("oss-bucket").value.trim();
+        const accessKeyId = document.getElementById("oss-ak-id").value.trim();
+        const accessKeySecret = document
+          .getElementById("oss-ak-secret")
+          .value.trim();
+
+        if (!region || !bucket || !accessKeyId || !accessKeySecret) {
+          alert("所有连接信息均为必填项！");
+          return;
+        }
+        try {
+          client = new OSS({
+            region,
+            accessKeyId,
+            accessKeySecret,
+            bucket,
+            secure: true,
+            timeout: 0,
+          });
+          log("OSS准备就绪...");
+          loginView.style.display = "none";
+          managementView.style.display = "block";
+          loadData();
+        } catch (error) {
+          alert(`连接失败: ${error.message}`);
+        }
+      });
+
+      // 核心
+      async function loadData() {
+        log("正在从OSS加载列表...");
+        songsTableBody.innerHTML = '<tr><td colspan="4">加载中...</td></tr>';
+        albumsTableBody.innerHTML = '<tr><td colspan="4">加载中...</td></tr>';
+        try {
+          const result = await client.get(jsonPath);
+          const data = JSON.parse(result.content.toString("utf-8"));
+          if (Array.isArray(data)) {
+            // 兼容旧的纯歌曲列表
+            allSongs = data;
+            allAlbums = [];
+          } else {
+            allSongs = data.songs || [];
+            allAlbums = data.albums || [];
+          }
+          renderAlbumsTable();
+          renderSongsTable(); // 默认渲染所有歌曲
+          log(
+            `加载成功，共 ${allAlbums.length} 张专辑，${allSongs.length} 首歌曲。`,
+          );
+        } catch (error) {
+          if (error.code === "NoSuchKey") {
+            log("music-list.json 不存在，列表为空。", true);
+            allSongs = [];
+            allAlbums = [];
+            renderAlbumsTable();
+            renderSongsTable();
+          } else {
+            log(`加载列表失败: ${error.message}`, true);
+          }
+        }
+      }
+
+      function renderSongsTable(filterSongIds = null) {
+        songsTableBody.innerHTML = "";
+        const songsToRender = filterSongIds
+          ? allSongs.filter((song) => filterSongIds.includes(song.id))
+          : allSongs;
+
+        if (songsToRender.length === 0) {
+          songsTableBody.innerHTML = `<tr><td colspan="4">${filterSongIds ? "此专辑下暂无歌曲。" : "暂无歌曲。"}</td></tr>`;
+          return;
+        }
+
+        songsToRender.forEach((song) => {
+          const originalIndex = allSongs.findIndex((s) => s.id === song.id); // 获取在allSongs中的索引
+          const row = document.createElement("tr");
+          row.innerHTML = `
+                <td>${song.id}</td><td>${song.title}</td><td>${song.artist}</td>
+                <td>
+                    <button class="edit-song-btn" data-index="${originalIndex}">编辑/管理文件</button>
+                    <button class="delete-song-btn btn-danger" data-index="${originalIndex}">删除整首</button>
+                </td>`;
+          songsTableBody.appendChild(row);
+        });
+      }
+
+      function renderAlbumsTable() {
+        albumsTableBody.innerHTML = "";
+        if (allAlbums.length === 0) {
+          albumsTableBody.innerHTML =
+            '<tr><td colspan="4">暂无专辑。</td></tr>';
+          return;
+        }
+        allAlbums.forEach((album, index) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+                <td>${album.id}</td><td>${album.title}</td><td>${album.artist}</td>
+                <td>
+                    <button class="manage-songs-btn btn-secondary" data-album-id="${album.id}">管理歌曲</button>
+                    <button class="edit-album-btn" data-index="${index}">编辑专辑</button>
+                    <button class="delete-album-btn btn-danger" data-index="${index}">删除专辑</button>
+                </td>`;
+          albumsTableBody.appendChild(row);
+        });
+      }
+
+      async function uploadJsonFile() {
+        log("正在将更新后的列表上传到OSS...");
+        try {
+          const dataToUpload = { albums: allAlbums, songs: allSongs };
+          const updatedJsonString = JSON.stringify(dataToUpload, null, 2);
+          const buffer = new OSS.Buffer(updatedJsonString);
+          await client.put(jsonPath, buffer);
+          log("歌曲列表(music-list.json)更新成功！");
+        } catch (error) {
+          log(`上传JSON失败: ${error.message}`, true);
+          throw error;
+        }
+      }
+
+      // 歌曲
+      function openSongModal(mode, index = -1) {
+        songModalMode = mode;
+        editingSongIndex = index;
+
+        document.getElementById("song-id").value = "";
+        document.getElementById("song-title").value = "";
+        document.getElementById("song-artist").value = "";
+        document.getElementById("song-album").value = "";
+        document.getElementById("song-bv").value = "";
+        document.getElementById("song-buy").value = "";
+
+        const idInput = document.getElementById("song-id");
+
+        if (mode === "add") {
+          document.getElementById("song-modal-title").innerText = "新增歌曲";
+          idInput.value = "song_" + Date.now();
+          idInput.disabled = false;
+          generateFileRows();
+        } else if (mode === "edit") {
+          const song = allSongs[index];
+          document.getElementById("song-modal-title").innerText =
+            `编辑: ${song.title}`;
+          idInput.value = song.id;
+          idInput.disabled = true;
+          document.getElementById("song-title").value = song.title;
+          document.getElementById("song-artist").value = song.artist;
+          document.getElementById("song-album").value = song.album;
+          document.getElementById("song-bv").value = song.bv || "";
+          document.getElementById("song-buy").value = song.buy || "";
+          generateFileRows(song);
+        }
+        songModal.style.display = "block";
+      }
+
+      function generateFileRows(song = null) {
+        const fileSection = document.getElementById("file-section");
+        fileSection.innerHTML = "<h3>文件管理</h3>";
+
+        for (const key in FILE_DEFINITIONS) {
+          const def = FILE_DEFINITIONS[key];
+          const hasFile =
+            song &&
+            (def.subProp
+              ? song[def.prop] && song[def.prop][def.subProp]
+              : song[def.prop]);
+
+          const row = document.createElement("div");
+          row.className = "file-row";
+          row.id = `filerow-${key}`;
+
+          row.innerHTML = `
+                <label>${def.label}</label>
+                <div>
+                    <input type="file" id="file-input-${key}">
+                    <span class="status-text">${hasFile ? "✔️ 已存在" : "❌ 不存在"}</span>
+                    <div class="progress-bar" id="progress-bar-${key}"><div class="progress-bar-inner"></div></div>
+                </div>
+                <button class="btn-secondary delete-stream-btn" data-key="${key}" style="display: ${hasFile ? "inline-block" : "none"}">删除</button>
+            `;
+          fileSection.appendChild(row);
+
+          if (def.attributes) {
+            const existingMeta =
+              song && song.availableFiles && song.availableFiles.original
+                ? song.availableFiles.original.metadata
+                : null;
+            const attributesHtml = `
+                    <div id="original-attributes-container" class="attributes-container" style="display: ${hasFile ? "flex" : "none"};">
+                        <div>
+                            <label for="audio-codec-original">编码</label>
+                            <select id="audio-codec-original">
+                                <option value="FLAC" ${existingMeta && existingMeta.codec === "FLAC" ? "selected" : ""}>FLAC</option>
+                                <option value="ALAC" ${existingMeta && existingMeta.codec === "ALAC" ? "selected" : ""}>ALAC</option>
+                                <option value="PCM" ${existingMeta && existingMeta.codec === "PCM" ? "selected" : ""}>PCM</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="audio-bitDepth-original">位深</label>
+                            <select id="audio-bitDepth-original">
+                                <option value="16 bit" ${existingMeta && existingMeta.bitDepth === "16 bit" ? "selected" : ""}>16 bit</option>
+                                <option value="24 bit" ${existingMeta && existingMeta.bitDepth === "24 bit" ? "selected" : "selected"}>24 bit</option>
+                                <option value="32 bit" ${existingMeta && existingMeta.bitDepth === "32 bit" ? "selected" : ""}>32 bit</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="audio-sampleRate-original">采样率</label>
+                            <select id="audio-sampleRate-original">
+                                <option value="44.1 kHz" ${existingMeta && existingMeta.sampleRate === "44.1 kHz" ? "selected" : ""}>44.1 kHz</option>
+                                <option value="48 kHz" ${existingMeta && existingMeta.sampleRate === "48 kHz" ? "selected" : "selected"}>48 kHz</option>
+                                <option value="88.2 kHz" ${existingMeta && existingMeta.sampleRate === "88.2 kHz" ? "selected" : ""}>88.2 kHz</option>
+                                <option value="96 kHz" ${existingMeta && existingMeta.sampleRate === "96 kHz" ? "selected" : ""}>96 kHz</option>
+                                <option value="192 kHz" ${existingMeta && existingMeta.sampleRate === "192 kHz" ? "selected" : ""}>192 kHz</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="quality-select-original">品质</label>
+                            <select id="quality-select-original">
+                                <option value="CD" ${existingMeta && existingMeta.quality === "CD" ? "selected" : ""}>CD</option>
+                                <option value="Hi-Res" ${existingMeta && existingMeta.quality === "Hi-Res" ? "selected" : "selected"}>Hi-Res</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+            fileSection.insertAdjacentHTML("beforeend", attributesHtml);
+          }
+        }
+      }
+
+      async function handleSongSave() {
+        const songId = document.getElementById("song-id").value.trim();
+        const title = document.getElementById("song-title").value.trim();
+        if (!songId || !title) {
+          alert("歌曲ID和标题是必填项！");
+          return;
+        }
+        if (!ID_VALIDATION_REGEX.test(songId)) {
+          alert("歌曲ID只能包含字母、数字和下划线！");
+          return;
+        }
+
+        const saveButton = document.getElementById("save-song-btn");
+        saveButton.disabled = true;
+        saveButton.innerText = "处理中...";
+
+        try {
+          let songEntry;
+          const isNewSong = songModalMode === "add";
+
+          if (isNewSong) {
+            if (allSongs.some((song) => song.id === songId)) {
+              alert(`错误：歌曲ID "${songId}" 已存在！`);
+              throw new Error("ID已存在");
+            }
+            songEntry = { id: songId, availableFiles: {} };
+          } else {
+            songEntry = allSongs[editingSongIndex];
+          }
+
+          // 更新元数据
+          songEntry.title = title;
+          songEntry.artist =
+            document.getElementById("song-artist").value.trim() || "未知艺术家";
+          songEntry.album =
+            document.getElementById("song-album").value.trim() || title;
+          songEntry.bv = document.getElementById("song-bv").value.trim();
+          songEntry.buy = document.getElementById("song-buy").value.trim();
+
+          const uploadPromises = [];
+          for (const key in FILE_DEFINITIONS) {
+            const fileInput = document.getElementById(`file-input-${key}`);
+            if (fileInput && fileInput.files.length > 0) {
+              const def = FILE_DEFINITIONS[key];
+              const file = fileInput.files[0];
+              const ossPath = `media/songs/${songId}/${def.fileName}`;
+
+              const promise = uploadFileWithProgress(key, ossPath, file).then(
+                () => {
+                  log(`文件 ${def.fileName} 上传成功。`);
+                  if (def.subProp) {
+                    if (!songEntry[def.prop]) songEntry[def.prop] = {};
+                    songEntry[def.prop][def.subProp] = { exists: true };
+                  } else {
+                    songEntry[def.prop] = true;
+                  }
+                },
+              );
+              uploadPromises.push(promise);
+            }
+          }
+          await Promise.all(uploadPromises);
+
+          if (
+            songEntry.availableFiles.original ||
+            document.getElementById("file-input-original").files.length > 0
+          ) {
+            if (!songEntry.availableFiles.original)
+              songEntry.availableFiles.original = { exists: true };
+            songEntry.availableFiles.original.metadata =
+              getSelectedOriginalMetadata();
+          }
+
+          if (isNewSong) {
+            allSongs.unshift(songEntry);
+          }
+
+          await uploadJsonFile();
+        } catch (error) {
+          log(`保存歌曲操作失败: ${error.message}`, true);
+        } finally {
+          saveButton.disabled = false;
+          saveButton.innerText = "保存";
+          songModal.style.display = "none";
+          renderSongsTable();
+        }
+      }
+
+      function getSelectedOriginalMetadata() {
+        const container = document.getElementById(
+          "original-attributes-container",
+        );
+        if (!container) return null;
+        return {
+          codec: document.getElementById("audio-codec-original").value,
+          bitDepth: document.getElementById("audio-bitDepth-original").value,
+          sampleRate: document.getElementById("audio-sampleRate-original")
+            .value,
+          quality: document.getElementById("quality-select-original").value,
+        };
+      }
+
+      // 专辑
+      function openAlbumModal(mode, index = -1) {
+        albumModalMode = mode;
+        editingAlbumIndex = index;
+
+        const idInput = document.getElementById("album-id");
+        const titleInput = document.getElementById("album-title");
+        const artistInput = document.getElementById("album-artist");
+        const songsTextarea = document.getElementById("album-songs");
+        const coverStatus = document.querySelector(
+          "#album-cover-row .status-text",
+        );
+        const deleteCoverBtn = document.getElementById(
+          "delete-album-cover-btn",
+        );
+
+        if (mode === "add") {
+          document.getElementById("album-modal-title").innerText = "新增专辑";
+          idInput.value = "album_" + Date.now();
+          idInput.disabled = false;
+          titleInput.value = "";
+          artistInput.value = "";
+          songsTextarea.value = "";
+          coverStatus.textContent = "❌ 不存在";
+          deleteCoverBtn.style.display = "none";
+        } else {
+          const album = allAlbums[index];
+          document.getElementById("album-modal-title").innerText =
+            `编辑: ${album.title}`;
+          idInput.value = album.id;
+          idInput.disabled = true;
+          titleInput.value = album.title;
+          artistInput.value = album.artist;
+          songsTextarea.value = (album.songs || []).join("\n");
+          if (album.hasArtwork) {
+            coverStatus.textContent = "✔️ 已存在";
+            deleteCoverBtn.style.display = "inline-block";
+          } else {
+            coverStatus.textContent = "❌ 不存在";
+            deleteCoverBtn.style.display = "none";
+          }
+        }
+        albumModal.style.display = "block";
+      }
+
+      async function handleAlbumSave() {
+        const albumId = document.getElementById("album-id").value.trim();
+        const title = document.getElementById("album-title").value.trim();
+        if (!albumId || !title) {
+          alert("专辑ID和标题是必填项！");
+          return;
+        }
+        if (!ID_VALIDATION_REGEX.test(albumId)) {
+          alert("专辑ID只能包含字母、数字和下划线！");
+          return;
+        }
+
+        const saveButton = document.getElementById("save-album-btn");
+        saveButton.disabled = true;
+        saveButton.innerText = "处理中...";
+
+        try {
+          let albumEntry;
+          const isNewAlbum = albumModalMode === "add";
+          if (isNewAlbum) {
+            if (allAlbums.some((album) => album.id === albumId)) {
+              alert(`错误：专辑ID "${albumId}" 已存在！`);
+              throw new Error("ID已存在");
+            }
+            albumEntry = { id: albumId, songs: [] };
+            allAlbums.unshift(albumEntry);
+          } else {
+            albumEntry = allAlbums[editingAlbumIndex];
+          }
+
+          albumEntry.title = title;
+          albumEntry.artist =
+            document.getElementById("album-artist").value.trim() ||
+            "未知艺术家";
+          albumEntry.songs = document
+            .getElementById("album-songs")
+            .value.trim()
+            .split("\n")
+            .filter(Boolean);
+
+          const coverInput = document.getElementById("album-cover-input");
+          if (coverInput.files.length > 0) {
+            const file = coverInput.files[0];
+            const ossPath = `media/albums/${albumId}/cover.jpg`;
+            log(`正在上传专辑 ${albumId} 的封面...`);
+            await uploadFileWithProgress("album-cover", ossPath, file);
+            albumEntry.hasArtwork = true;
+            log("封面上传成功。");
+          }
+
+          await uploadJsonFile();
+          log("专辑信息保存成功！");
+        } catch (error) {
+          log(`保存专辑失败: ${error.message}`, true);
+        } finally {
+          saveButton.disabled = false;
+          saveButton.innerText = "保存";
+          albumModal.style.display = "none";
+          renderAlbumsTable();
+        }
+      }
+
+      async function deleteSong(index) {
+        const song = allSongs[index];
+        if (
+          !confirm(
+            `确定要删除整首歌曲《${song.title}》吗？相关文件将从OSS删除且无法恢复！`,
+          )
+        )
+          return;
+        log(`正在删除歌曲: ${song.title}...`);
+        try {
+          const folder = `media/songs/${song.id}/`;
+          const list = await client.list({ prefix: folder, "max-keys": 1000 });
+          if (list.objects && list.objects.length > 0) {
+            await client.deleteMulti(list.objects.map((obj) => obj.name));
+            log("OSS相关文件删除成功！");
+          }
+          allSongs.splice(index, 1);
+          await uploadJsonFile();
+          renderSongsTable();
+        } catch (error) {
+          log(`删除歌曲失败: ${error.message}`, true);
+        }
+      }
+
+      async function deleteAlbum(index) {
+        const album = allAlbums[index];
+        if (
+          !confirm(
+            `确定要删除专辑《${album.title}》吗？这不会删除专辑内的歌曲本身，但会删除专辑封面。`,
+          )
+        )
+          return;
+        log(`正在删除专辑: ${album.title}...`);
+        try {
+          if (album.hasArtwork) {
+            const coverPath = `media/albums/${album.id}/cover.jpg`;
+            await client.delete(coverPath);
+            log("专辑封面已从OSS删除。");
+          }
+          allAlbums.splice(index, 1);
+          await uploadJsonFile();
+          renderAlbumsTable();
+        } catch (error) {
+          log(`删除专辑失败: ${error.message}`, true);
+        }
+      }
+
+      async function uploadFileWithProgress(key, ossPath, file) {
+        const progressBar = document.getElementById(`progress-bar-${key}`);
+        if (!progressBar) throw new Error(`无法找到 ${key} 的进度条。`);
+
+        const progressBarInner = progressBar.querySelector(
+          ".progress-bar-inner",
+        );
+        progressBar.style.display = "block";
+        try {
+          await client.put(ossPath, file, {
+            progress: (p) => {
+              progressBarInner.style.width = `${Math.floor(p * 100)}%`;
+            },
+          });
+        } finally {
+          setTimeout(() => {
+            progressBar.style.display = "none";
+            progressBarInner.style.width = "0%";
+          }, 1000);
+        }
+      }
+
+      async function deleteStream(key, songIndex) {
+        const song = allSongs[songIndex];
+        const def = FILE_DEFINITIONS[key];
+        if (!confirm(`您确定要删除文件 ${def.fileName} 吗？`)) return;
+        log(`准备删除文件: ${def.fileName} ...`);
+        const ossPath = `media/songs/${song.id}/${def.fileName}`;
+        try {
+          await client.delete(ossPath);
+          log(`文件 ${def.fileName} 已从OSS删除。`);
+          if (def.subProp) {
+            if (song[def.prop]) song[def.prop][def.subProp] = false;
+          } else {
+            song[def.prop] = false;
+          }
+          const row = document.getElementById(`filerow-${key}`);
+          row.querySelector(".status-text").textContent = "❌ 不存在";
+          row.querySelector(".delete-stream-btn").style.display = "none";
+          if (key === "original") {
+            document.getElementById(
+              "original-attributes-container",
+            ).style.display = "none";
+          }
+          await uploadJsonFile();
+        } catch (error) {
+          log(`删除 ${def.fileName} 失败: ${error.message}`, true);
+        }
+      }
+
+      // 监听
+      document
+        .getElementById("refresh-btn")
+        .addEventListener("click", loadData);
+
+      // 歌曲Modal
+      document
+        .getElementById("add-song-btn")
+        .addEventListener("click", () => openSongModal("add"));
+      document
+        .getElementById("save-song-btn")
+        .addEventListener("click", handleSongSave);
+      document
+        .querySelector(".song-modal-close")
+        .addEventListener("click", () => (songModal.style.display = "none"));
+      songsTableBody.addEventListener("click", (event) => {
+        if (event.target.classList.contains("edit-song-btn")) {
+          openSongModal("edit", parseInt(event.target.dataset.index));
+        }
+        if (event.target.classList.contains("delete-song-btn")) {
+          deleteSong(parseInt(event.target.dataset.index));
+        }
+      });
+
+      // 专辑Modal和筛选
+      document
+        .getElementById("add-album-btn")
+        .addEventListener("click", () => openAlbumModal("add"));
+      document
+        .getElementById("save-album-btn")
+        .addEventListener("click", handleAlbumSave);
+      document
+        .querySelector(".album-modal-close")
+        .addEventListener("click", () => (albumModal.style.display = "none"));
+      albumsTableBody.addEventListener("click", (event) => {
+        const target = event.target;
+        if (target.classList.contains("edit-album-btn")) {
+          openAlbumModal("edit", parseInt(target.dataset.index));
+        }
+        if (target.classList.contains("delete-album-btn")) {
+          deleteAlbum(parseInt(target.dataset.index));
+        }
+        if (target.classList.contains("manage-songs-btn")) {
+          const albumId = target.dataset.albumId;
+          const album = allAlbums.find((a) => a.id === albumId);
+          if (album) {
+            renderSongsTable(album.songs || []);
+            songFilterStatus.textContent = `（正在显示专辑 "${album.title}" 中的歌曲）`;
+            showAllSongsBtn.style.display = "inline-block";
+          }
+        }
+      });
+
+      showAllSongsBtn.addEventListener("click", () => {
+        renderSongsTable();
+        songFilterStatus.textContent = "";
+        showAllSongsBtn.style.display = "none";
+      });
+
+      // 文件管理
+      document
+        .getElementById("file-section")
+        .addEventListener("click", (event) => {
+          if (event.target.classList.contains("delete-stream-btn")) {
+            const key = event.target.getAttribute("data-key");
+            deleteStream(key, editingSongIndex);
+          }
+        });
+      document
+        .getElementById("file-section")
+        .addEventListener("change", (event) => {
+          const fileInput = event.target;
+          if (
+            fileInput.type === "file" &&
+            fileInput.id.startsWith("file-input-")
+          ) {
+            const key = fileInput.id.replace("file-input-", "");
+            if (key === "original" && fileInput.files.length > 0) {
+              document.getElementById(
+                "original-attributes-container",
+              ).style.display = "flex";
+            }
+          }
+        });
+    </script>
+  </body>
+</html>

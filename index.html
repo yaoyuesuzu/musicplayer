@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="data/favicon.ico" type="image/x-icon" />
+    <title>TITLE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-white text-black font-sans overflow-hidden">
+    <div id="fullscreen-ripple-container"></div>
+
+    <div id="global-verification-modal" class="fixed inset-0 bg-black bg-opacity-70 z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm text-center">
+            <h3 class="text-xl font-bold mb-4">正在进行人机验证...</h3>
+            <p class="text-sm text-gray-600 mb-4">请稍候，我们正在进行安全检查。</p>
+            <p class="text-sm text-gray-600 mb-4">如果您长时间处于该页面，请检查您访问的网站协议是否为HTTPS。</p>
+            <div id="global-verification-status" class="flex justify-center items-center h-16">
+                <span class="verifying-dot"></span><span class="verifying-dot"></span><span class="verifying-dot"></span>
+            </div>
+        </div>
+    </div>
+    <div id="app-main" class="h-screen w-screen flex flex-col">
+        <header id="main-header" class="p-4 md:px-6 border-b border-gray-200 bg-white/80 backdrop-blur-md z-30 flex-shrink-0">
+            <div class="max-w-7xl mx-auto flex items-center justify-between gap-x-6">
+                <a href="#" class="text-xl font-bold hidden sm:block">摇月草窝</a>
+                <div class="flex items-center p-1 bg-gray-200 rounded-full">
+                    <button id="mode-btn-normal" class="mode-switch-btn active">常规</button>
+                    <button id="mode-btn-share" class="mode-switch-btn">共享</button>
+                </div>
+                <div class="relative w-full max-w-xs">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" id="search-input" placeholder="搜索歌曲、艺人" class="search-input">
+                </div>
+            </div>
+        </header>
+
+        <div id="mini-player" class="w-full bg-neutral-100/80 backdrop-blur-md border-b border-gray-200 p-2 flex-shrink-0 transform -translate-y-full transition-transform duration-500 ease-in-out z-20 sticky top-0">
+            <div class="max-w-7xl mx-auto flex items-center gap-x-4">
+                <img id="mini-player-artwork" src="" class="w-12 h-12 rounded-md cursor-pointer">
+                <div class="flex-grow cursor-pointer" id="mini-player-info">
+                    <p id="mini-player-title" class="font-semibold text-sm text-black">歌曲名称</p>
+                    <p id="mini-player-artist" class="text-xs text-neutral-600">艺术家</p>
+                </div>
+                <div class="flex items-center gap-x-4">
+                    <button id="mini-player-prev" class="text-xl text-neutral-500 hover:text-black"><i class="fas fa-backward-step"></i></button>
+                    <button id="mini-player-play-pause" class="text-3xl text-black"><i class="fas fa-play"></i></button>
+                    <button id="mini-player-next" class="text-xl text-neutral-500 hover:text-black"><i class="fas fa-forward-step"></i></button>
+                    <button id="mini-player-queue" class="text-xl text-neutral-500 hover:text-black ml-4"><i class="fas fa-list-ul"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <main id="main-content" class="flex-grow overflow-y-auto relative">
+            <div id="view-container" class="max-w-7xl mx-auto p-4 md:p-8">
+                <div id="library-view" class="view"></div>
+                <div id="song-detail-view" class="view hidden"></div>
+                <div id="album-detail-view" class="view hidden"></div>
+                <div id="playlist-detail-view" class="view hidden"></div>
+                <div id="search-view" class="view hidden"></div>
+            </div>
+            
+            <footer class="text-center text-sm text-neutral-500 py-8 space-x-4">
+                <span>由</span>
+                <a href="https://space.bilibili.com/5414942" target="_blank" rel="noopener noreferrer" class="underline hover:text-neutral-600 font-medium">
+                    <i class="fab fa-bilibili"></i> 摇月suzu
+                </a>
+                <span>与</span>
+                <a href="https://space.bilibili.com/439295805" target="_blank" rel="noopener noreferrer" class="underline hover:text-neutral-600 font-medium">
+                    <i class="fab fa-bilibili"></i> 某不知名字幕组
+                </a>
+                <span>共同维护</span>
+                <span class="mx-2">|</span>
+                <span class="mx-2"></span>
+                由摇月的</span><a href="https://github.com/yaoyuesuzu/musicplayer" target="_blank" rel="noopener noreferrer" class="underline hover:text-neutral-600 font-medium">
+                    <i class="fab fa-github"></i> 开源项目
+                </a><span class="mx-2"></span>强力驱动<br>
+            </footer>
+        </main>
+        
+    </div>
+    
+    <div id="player-fullscreen" class="fixed inset-0 bg-black transform translate-y-full transition-transform duration-700 ease-in-out flex flex-col z-50 p-4 md:p-8">
+        <div id="player-bg"></div>
+        <div class="relative z-10 flex-shrink-0 flex items-center justify-between">
+            <button id="close-player-btn" class="control-glass-btn"><i class="fas fa-chevron-down"></i></button>
+            <button id="queue-btn" class="control-glass-btn"><i class="fas fa-list-ul"></i></button>
+        </div>
+        <div class="relative z-10 flex-grow flex items-center justify-center max-w-7xl w-full mx-auto">
+            <div class="flex items-center justify-center w-full gap-x-24">
+                <div id="left-pane" class="w-3/5 max-w-lg flex flex-col gap-y-6">
+                    <img id="player-artwork" src="" class="w-full aspect-square rounded-lg shadow-2xl">
+                    <div id="player-controls-view" class="w-full">
+                        <div class="flex justify-between items-start">
+                             <div>
+                                <h2 id="player-title" class="text-2xl font-bold">歌曲名称</h2>
+                                <p id="player-artist" class="text-lg text-neutral-300">艺术家</p>
+                            </div>
+                            <div id="source-switcher" class="flex items-center gap-2 p-1 rounded-full glass-bg-deep flex-shrink-0"></div>
+                        </div>
+                        <div class="w-full mt-4">
+                            <div id="progress-container" class="progress-bar-bg"><div id="progress-bar" class="progress-bar-fg"></div></div>
+                            <div class="flex justify-between text-xs text-neutral-400 mt-1">
+                                <span id="current-time">0:00</span>
+                                <span id="duration">0:00</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-center gap-6 mt-4">
+                            <button id="prev-btn" class="control-btn text-2xl"><i class="fas fa-backward-step"></i></button>
+                            <button id="play-pause-btn" class="play-btn">
+                                <i id="play-icon" class="fas fa-play ml-1"></i>
+                                <i id="pause-icon" class="fas fa-pause hidden"></i>
+                            </button>
+                            <button id="next-btn" class="control-btn text-2xl"><i class="fas fa-forward-step"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div id="right-pane" class="w-2/5 h-[75vh]">
+                    <div id="lyrics-view" class="h-full">
+                        <div id="lyrics-container" class="w-full h-full"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="playlist-view" class="fixed top-0 right-0 bottom-0 w-full max-w-md bg-neutral-800/80 backdrop-blur-xl border-l border-neutral-700 p-6 z-[60] transform translate-x-full transition-transform duration-500 ease-in-out">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-white">播放队列</h2>
+            <button id="close-playlist-btn" class="control-glass-btn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="playlist-list" class="space-y-2 h-full overflow-y-auto pb-16"></div>
+    </div>
+
+    <div id="download-modal" class="fixed inset-0 bg-black bg-opacity-50 z-[70] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm text-center">
+            <h3 id="download-modal-title" class="text-xl font-bold mb-4">下载文件</h3>
+            <p id="download-modal-subtitle" class="text-sm text-gray-600 mb-4">正在进行安全验证，请稍候...</p>
+            <div id="verification-status" class="flex justify-center items-center h-16">
+                <span class="verifying-dot"></span><span class="verifying-dot"></span><span class="verifying-dot"></span>
+            </div>
+            <div id="download-links" class="space-y-3 hidden"></div>
+            <button id="close-download-modal-btn" class="mt-6 w-full bg-gray-200 hover:bg-gray-300 text-black py-2 rounded-md transition-colors">关闭</button>
+        </div>
+    </div>
+    
+    <div id="share-mode-footer" class="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-gray-200 p-4 z-40 transform translate-y-full transition-transform duration-300 ease-in-out">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <span id="selection-counter" class="font-medium text-lg">已选择 0 首歌曲</span>
+            <button id="generate-playlist-btn" class="action-btn primary" disabled>
+                <i class="fas fa-magic"></i> 生成歌单ID
+            </button>
+        </div>
+    </div>
+
+    <div id="toast-notification" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-black text-white px-6 py-3 rounded-full text-sm font-semibold shadow-lg opacity-0 transform translate-y-4 transition-all duration-300 ease-in-out z-[80]">
+        <p id="toast-message"></p>
+    </div>
+
+    <div id="edit-playlist-modal" class="fixed inset-0 bg-black bg-opacity-70 z-[70] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm text-center">
+            <h3 class="text-xl font-bold mb-4">编辑歌单信息</h3>
+            
+            <img id="edit-playlist-cover-preview" src="data/notfound.png" alt="歌单封面预览">
+
+            <div class="mb-4 text-left">
+                <label for="edit-playlist-name" class="block text-sm font-medium text-gray-700 mb-1">歌单名称</label>
+                <input type="text" id="edit-playlist-name" class="w-full p-2 border border-gray-300 rounded-md">
+            </div>
+
+            <div class="mb-6">
+                <label for="edit-playlist-cover" class="file-input-label">
+                    <i class="fas fa-camera"></i> 上传新封面
+                </label>
+                <input type="file" id="edit-playlist-cover" accept="image/jpeg, image/png, image/webp">
+                <p class="text-xs text-gray-500 mt-2">提示：为节省本地空间，建议上传小于1MB的图片。</p>
+            </div>
+
+            <button id="save-playlist-changes-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md transition-colors mb-2">保存更改</button>
+            <button id="close-edit-playlist-modal-btn" class="w-full bg-gray-200 hover:bg-gray-300 text-black py-2 rounded-md transition-colors">取消</button>
+        </div>
+    </div>
+
+    <div id="bottom-visualizer-bar" class="fixed bottom-0 left-0 right-0 h-24 z-30 pointer-events-none bg-white/30 backdrop-blur-md" style="transform: translateY(100%); transition: transform 0.5s cubic-bezier(0.4, 0.2, 1);">
+        <canvas id="bottom-visualizer-canvas" class="w-full h-full"></canvas>
+    </div>
+
+    <audio id="audio-player" src=""></audio>
+    <script src="app.js"></script>
+</body>
+</html>
